@@ -1,5 +1,7 @@
 ## Parametric T<sub>2</sub> relaxometry for myelin water quantification using T<sub>2</sub>-spiral data
 
+<img src="Figure_slices.png" width="1082">
+
 ***The current implementation is written in Python 3***
 
 ## Install dependencies 🔧
@@ -64,7 +66,7 @@ The software will save the predicted signal (Predicted_Data4D.nii.gz), as well a
 - FWF.nii.gz: Free and quasi-free Water Fraction (i.e., T2 > 200ms) 
 - T2_M.nii.gz: Geometric mean T2 of the myelin water.
 - T2_IE.nii.gz: Geometric mean T2 of the intra- and extra-cellular water
-- K_global.nii.gz: Total Water Content, i.e., proton density
+- K_global.nii.gz: Proportional to the Proton density (i.e., total water content)
 ```
 
 ## References ✒️

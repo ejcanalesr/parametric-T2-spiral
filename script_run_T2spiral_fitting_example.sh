@@ -32,11 +32,11 @@ for subi in $list_subjects; do
    
        echo "(2) Brain extraction (BET) using FSL"
        fslmaths Recon_folder/$subi/Data.nii.gz -Tmean Recon_folder/$subi/Data_avg.nii.gz
-       bet Recon_folder/$subi/Data_avg.nii.gz Recon_folder/$subi/Data_mask -m -v -f 0.4
+       bet Recon_folder/$subi/Data_avg.nii.gz Recon_folder/$subi/Data_mask -m -v -f 0.5
        mv Recon_folder/$subi/Data_mask_mask.nii.gz Recon_folder/$subi/mask.nii.gz
 
        echo "(3) Parametric multicomponent T2 estimation (three compartments):"
-       python3 call_estimation_script.py --path_to_folder='Recon_folder'/$subi/ --input='Data.nii.gz' --mask='mask.nii.gz'  --denoise='TV3D' --reg_para=3 --savefig='yes' --savefig_slice=90 --numcores=-1
+       python3 call_estimation_script.py --path_to_folder='Recon_folder'/$subi/ --input='Data.nii.gz' --mask='mask.nii.gz'  --denoise='TV2D' --reg_para=1.5 --savefig='yes' --savefig_slice=17 --numcores=-1
 
        # Total water content/proton-density correction for bias-field inhomogeneity
        echo "(4) Bias-field correction of the proton density map (K_global) using FAST-FSL"

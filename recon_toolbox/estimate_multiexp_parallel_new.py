@@ -3,9 +3,7 @@
 
 import numpy as np
 import nibabel as nib
-from numpy import inf, loadtxt
-
-from dipy.segment.mask import median_otsu
+from numpy import inf
 
 import scipy
 from   scipy.optimize import minimize_scalar, fminbound, minimize
@@ -18,6 +16,8 @@ from skimage.restoration import (denoise_tv_chambolle,
                                  estimate_sigma)
 import os
 import re
+
+#import pdb
 
 # -----------------------------------------------------------------------------#
 # ---------------------------- Declare functions ------------------------------#
@@ -33,7 +33,7 @@ def fitting_voxel(data_xyz, TE_array):
     #               x0  x1   x2  x3   x4   x5    x6
     x0          = [600, 0.1, 10, 0.89, 60, 2000, 0.01] # initial estimate for K1, MWF, T2_M, IEWF, T2_IE, T2_CSF, FWF
     #                   x0       x1      x2       x3        x4        x5          x6
-    bnds        = ( (0, +inf), (0, 1), (5, 20), (0, 1), (21, 200), (201, 2000), (0, 1)) # bounds
+    bnds        = ( (0, +inf), (0, 1), (10, 30), (0, 1), (31, 200), (201, 2000), (0, 1)) # bounds
     #res         = minimize(obj_fun, x0, method = 'L-BFGS-B', options={'gtol': 1e-20, 'disp': False, 'maxiter': 1000}, bounds = bnds, args=(data_xyz, TE_array) )
     res         = minimize(obj_fun, x0, method = 'SLSQP', options={'disp': False}, bounds = bnds, constraints=({'type':'eq', 'fun': con}), args=(data_xyz, TE_array) )
     reg_sol     = res.x
@@ -109,6 +109,10 @@ def motor_recon(TE_array, path_to_data, path_to_mask, path_to_save_data, denoise
         data[:,:,:,c] = np.squeeze(data[:,:,:,c]) * mask
     #end
 
+    # Only for testing: selects a few slices
+    #mask[:,:,18:-1] = 0
+    #mask[:,:,0:17]  = 0
+
     # -------------------------------------------------------------------------#
     # ---------------------------- Denoising ----------------------------------#
     # -------------------------------------------------------------------------#
@@ -119,20 +123,22 @@ def motor_recon(TE_array, path_to_data, path_to_mask, path_to_save_data, denoise
             print(voxelt+1, ' volumes processed')
             data_vol  = np.squeeze(data[:,:,:,voxelt])
             sigma_est = np.mean(estimate_sigma(data_vol, multichannel=False))
-            data[:,:,:,voxelt] = denoise_tv_chambolle(data_vol, weight=3.0*sigma_est, eps=0.0002, n_iter_max=200, multichannel=False)
+            data[:,:,:,voxelt] = denoise_tv_chambolle(data_vol, weight=reg_param*sigma_est, eps=0.0002, n_iter_max=200, multichannel=False)
         #end for
         outImg = nib.Nifti1Image(data, img.affine)
         nib.save(outImg, path_to_save_data + 'Data_denoised.nii.gz')
     #end if
-    if denoise == 'TV2D' :
+    if denoise == 'TV2D' : #Preferred option for this data
         print ('Step #1: Denoising using (2D) Total Variation:')
         # This could be a better option if the slice thickness is much bigger than the in plane resolution
         for voxelt in progressbar.progressbar(range(nt), redirect_stdout=True):
             print(voxelt+1, ' volumes processed')
             for slicet in range(nz):
                 data_vol2D  = np.squeeze(data[:,:,slicet,voxelt])
-                sigma_est   = estimate_sigma(data_vol2D)
-                data[:,:,slicet,voxelt] = denoise_tv_chambolle(data_vol2D, weight=3.0*sigma_est, eps=0.0002, n_iter_max=200)
+                if np.sum(np.abs(data_vol2D).flatten()) > 0 :
+                    sigma_est   = estimate_sigma(data_vol2D)
+                    data[:,:,slicet,voxelt] = denoise_tv_chambolle(data_vol2D, weight=reg_param*sigma_est, eps=0.0002, n_iter_max=200)
+                #end
             #end for slices
         # end for volumes
         outImg = nib.Nifti1Image(data, img.affine)
@@ -184,35 +190,35 @@ def motor_recon(TE_array, path_to_data, path_to_mask, path_to_save_data, denoise
     # -------------------------------------------------------------------------#
 
     print ('Step #3: Save to disk:')
-    outImg = nib.Nifti1Image(K_global, img0.affine)
+    outImg = nib.Nifti1Image(K_global, img.affine)
     print('Saving K_global map to :', path_to_save_data + 'K_global.nii.gz')
     nib.save(outImg, path_to_save_data + 'K_global.nii.gz')
 
-    outImg = nib.Nifti1Image(MWF, img0.affine)
+    outImg = nib.Nifti1Image(MWF, img.affine)
     print('Saving MWF map to :', path_to_save_data + 'MWF.nii.gz')
     nib.save(outImg, path_to_save_data + 'MWF.nii.gz')
 
-    outImg = nib.Nifti1Image(T2_M, img0.affine)
+    outImg = nib.Nifti1Image(T2_M, img.affine)
     print('Saving T2_M map to :', path_to_save_data + 'T2_M.nii.gz')
     nib.save(outImg, path_to_save_data + 'T2_M.nii.gz')
 
-    outImg = nib.Nifti1Image(IEWF, img0.affine)
+    outImg = nib.Nifti1Image(IEWF, img.affine)
     print('Saving IEWF map to :', path_to_save_data + 'IEWF.nii.gz')
     nib.save(outImg, path_to_save_data + 'IEWF.nii.gz')
 
-    outImg = nib.Nifti1Image(T2_IE, img0.affine)
+    outImg = nib.Nifti1Image(T2_IE, img.affine)
     print('Saving T2_IE map to :', path_to_save_data + 'T2_IE.nii.gz')
     nib.save(outImg, path_to_save_data + 'T2_IE.nii.gz')
 
-    outImg = nib.Nifti1Image(T2_FWF, img0.affine)
+    outImg = nib.Nifti1Image(T2_FWF, img.affine)
     print('Saving T2_FWF map to :', path_to_save_data + 'T2_FWF.nii.gz')
     nib.save(outImg, path_to_save_data + 'T2_FWF.nii.gz')
 
-    outImg = nib.Nifti1Image(FWF, img0.affine)
+    outImg = nib.Nifti1Image(FWF, img.affine)
     print('Saving FWF map to :', path_to_save_data + 'FWF.nii.gz')
     nib.save(outImg, path_to_save_data + 'FWF.nii.gz')
 
-    outImg = nib.Nifti1Image(Predicted_Data4D, img0.affine)
+    outImg = nib.Nifti1Image(Predicted_Data4D, img.affine)
     print('Saving predicted signal to :', path_to_save_data + 'Predicted_Data4D.nii.gz')
     nib.save(outImg, path_to_save_data + 'Predicted_Data4D.nii.gz')
 

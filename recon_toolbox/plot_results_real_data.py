@@ -38,11 +38,7 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
     'font.family': 'serif',
     }
 
-    #'figure.figsize': [3.39, 2.10],
-
-    #matplotlib.rcParams.update(params)
-
-    fig1 = plt.figure('Showing all results', figsize=(11,10), constrained_layout=True)
+    fig1 = plt.figure('Showing all results', figsize=(18, 10), constrained_layout=True)
 
     # load data
     img  = nib.load(path_to_data)
@@ -69,7 +65,7 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
     T2IE = img.get_data()
     T2IE = T2IE.astype(np.float64, copy=False)
 
-    img  = nib.load(path_to_save_data + 'K_global_corrected.nii.gz')
+    img  = nib.load(path_to_save_data + 'K_global.nii.gz')
     Ktotal = img.get_data()
     Ktotal = Ktotal.astype(np.float64, copy=False)
 
@@ -80,7 +76,7 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
 
     plt.subplot(2, 3, 1).set_axis_off()
     im6 = plt.imshow(Ktotal[:,:,Slice].T, cmap='gray', origin='upper')
-    plt.title('Total Water Content')
+    plt.title('Proton density')
     colorbar(im6)
 
     plt.subplot(2, 3, 2).set_axis_off()
@@ -99,7 +95,7 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
     colorbar(im3)
 
     plt.subplot(2, 3, 5).set_axis_off()
-    im4 = plt.imshow(T2m[:,:,Slice].T, cmap='gnuplot2', origin='upper', clim=(5,20))
+    im4 = plt.imshow(T2m[:,:,Slice].T, cmap='gnuplot2', origin='upper', clim=(5,25))
     plt.title('T2-Myelin (ms)')
     colorbar(im4)
 
@@ -109,7 +105,8 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
     colorbar(im5)
 
     #plt.tight_layout()
-    fig1.set_constrained_layout_pads(w_pad=0.05, h_pad=0.05, hspace=0.07, wspace=-0.3)
+    #fig1.set_constrained_layout_pads(w_pad=0.05, h_pad=0.05, hspace=0.07, wspace=-0.3)
+    fig1.set_constrained_layout_pads(w_pad=0.07, h_pad=0.07, hspace=0.07, wspace=0.07)
     plt.savefig(path_to_save_data + 'Figure_slices.png', dpi=600)
     #plt.show()
     #fig1.show()
@@ -131,13 +128,13 @@ def plot_real_data_slices(path_to_save_data, path_to_data, Slice):
     ax4.grid(True)
 
 
-    im1 = ax2.imshow(T2m[:,:,Slice].T, cmap='gray', origin='upper', clim=(5,20))
+    im1 = ax2.imshow(T2m[:,:,Slice].T, cmap='gray', origin='upper', clim=(5,25))
     ax2.set_title('T2m')
     colorbar(im1)
 
     x = T2m[:,:,Slice].flatten()
     x = x[x>0]
-    ax5.hist(x, 50, density=1, facecolor='IndianRed', alpha=1.0, range=[5, 20])
+    ax5.hist(x, 50, density=1, facecolor='IndianRed', alpha=1.0, range=[5, 30])
     ax5.set_title('Histogram of T2m')
     ax5.set_xlabel('T2m')
     ax5.set_ylabel('Probability')

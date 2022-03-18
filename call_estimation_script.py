@@ -26,13 +26,13 @@ parser.add_argument("--denoise",
                     choices=["TV2D", "TV3D", "None"],
                     required=True, type=str, default="None", help="Denoising method")
 
-parser.add_argument("--reg_param", default=3.0, type=float, help="Regularization parameter for TV denoising", required=False)
+parser.add_argument("--reg_param", default=3.0, type=float, help="Regularization parameter for TV denoising")
 
 parser.add_argument("--savefig",
                     choices=["yes", "no"],
                     required=True, type=str, default="yes", help="Save reconstructed maps in .png")
 
-parser.add_argument("--savefig_slice", default=90, type=int, help="Axial slice to save reconstructed maps, e.g., --Slice=90", required=True)
+parser.add_argument("--savefig_slice", default=17, type=int, help="Axial slice to save reconstructed maps, e.g., --Slice=17", required=True)
 
 parser.add_argument("--numcores", default=-1, type=int, help="Number of cores used in the computation: -1 = all cores")
 
