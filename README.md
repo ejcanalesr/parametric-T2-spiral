@@ -58,15 +58,16 @@ We included some optional pre- and post-processing steps using FSL (https://fsl.
 
 ## Estimated maps 🚀
 
-The software will save the predicted signal (Predicted_Data4D.nii.gz), as well as the following metrics derived from the three-compartment model:
+The software will save the following metrics derived from the three-compartment model:
 
 ```
 - MWF.nii.gz: Myelin Water Fraction
 - IEWF.nii.gz: Intra- and Extra-cellular Water Fraction
 - FWF.nii.gz: Free and quasi-free Water Fraction (i.e., T2 > 200ms) 
-- T2_M.nii.gz: Geometric mean T2 of the myelin water.
-- T2_IE.nii.gz: Geometric mean T2 of the intra- and extra-cellular water
-- K_global.nii.gz: Proportional to the Proton density (i.e., total water content)
+- T2_M.nii.gz: T2 of the myelin water.
+- T2_IE.nii.gz: T2 of the intra- and extra-cellular water
+- K_global.nii.gz: It is proportional to the Proton density (i.e., total water content)
+- Predicted_Data4D.nii.gz: Predicted signal
 ```
 
 ## References ✒️
