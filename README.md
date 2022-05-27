@@ -13,7 +13,7 @@
 - skimage
 - joblib
 - multiprocessing
-- progressbar
+- progressbar2
 - joypy
 - pandas
 - tabulate
